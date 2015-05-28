@@ -17,13 +17,15 @@ namespace OnlineRadio
         public Form1()
         {
             InitializeComponent();
+            InitNotifyIconEvent();      
             InitWebBrowser();
             TimerSetting();
-            InitButtionClickEvent();
+            InitButtionClickEvent();      
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+
         }
 
         #region InitWebBrowser
@@ -132,15 +134,15 @@ namespace OnlineRadio
 
                     InitRadioListBox(radioDic);
                     radioName.Text = radioDic.First().Value;
-                    timer.Start();               
+                    timer.Start();
                     webBrowser.DocumentCompleted -= WebBrowserCompletedEventHandler;
-                    
+
                 }
-            }         
+            }
         }
 
         #endregion
-                    
+
         #region NextAndPreviousClickEventHandler
 
         private void NextAndPreviousClickEventHandler(object sender, EventArgs e)
@@ -155,6 +157,13 @@ namespace OnlineRadio
             var selectItem = (KeyValuePair<string, string>)radioListBox.SelectedValue;
             radioName.Text = selectItem.Value;
             webBrowser.Document.InvokeScript("changeRadio", new object[] { selectItem.Key });
+
+            if (play.Tag == "Start")
+            {
+                timer.Start();
+                play.BackgroundImage = Properties.Resources.stop;
+                play.Tag = "Stop";
+            }
         }
 
         #endregion
@@ -174,5 +183,31 @@ namespace OnlineRadio
         }
 
         #endregion
+
+        #region InitNotifyIconEvent
+
+        private void InitNotifyIconEvent()
+        {
+            this.components = new System.ComponentModel.Container();
+            var notifyIcon = new NotifyIcon(this.components);
+            notifyIcon.Text = "OnlineRadio";
+            notifyIcon.Icon = Properties.Resources.radio;
+            notifyIcon.DoubleClick += (s, e) =>
+            {
+                notifyIcon.Visible = false;
+                this.Show();
+                this.WindowState = FormWindowState.Normal;
+            };
+            this.Resize += (x, e1) =>
+            {
+                if (this.WindowState == FormWindowState.Minimized)
+                {
+                    notifyIcon.Visible = true;
+                    this.Hide();
+                }
+            };
+        }
+
+        #endregion      
     }
 }
